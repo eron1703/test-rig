@@ -72,6 +72,42 @@ export async function startServer(host: string, port: number) {
       return;
     }
 
+    if (url === '/test/stream' && req.method === 'GET') {
+      // Server-Sent Events (SSE) endpoint for test progress streaming
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+      });
+
+      // Send initial connection message
+      res.write(`data: ${JSON.stringify({ status: 'connected', progress: 0 })}\n\n`);
+
+      // Simulate test progress
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 15) + 5; // Increment 5-20%
+        if (progress > 100) progress = 100;
+
+        res.write(`data: ${JSON.stringify({ 
+          status: progress === 100 ? 'complete' : 'running', 
+          progress 
+        })}\n\n`);
+
+        if (progress === 100) {
+          clearInterval(interval);
+          res.end();
+        }
+      }, 1000);
+
+      // Handle client disconnect
+      req.on('close', () => {
+        clearInterval(interval);
+      });
+      return;
+    }
+
     // 404
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Not found' }));
@@ -85,6 +121,7 @@ export async function startServer(host: string, port: number) {
     console.log(chalk.gray('API Endpoints:'));
     console.log(chalk.gray('   POST /test/run - Run tests'));
     console.log(chalk.gray('   POST /test/generate - Generate tests'));
+    console.log(chalk.gray('   GET /test/stream - Stream test progress'));
     console.log(chalk.gray('   GET /health - Health check\n'));
   });
 
