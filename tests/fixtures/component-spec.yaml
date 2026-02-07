@@ -1,0 +1,21 @@
+component: user-service
+description: User management service
+dependencies:
+  - database
+  - auth-service
+files:
+  - src/services/user-service.ts
+  - src/models/user.ts
+subcomponents:
+  - name: UserRepository
+    file: src/repositories/user-repository.ts
+    type: repository
+  - name: UserValidator
+    file: src/validators/user-validator.ts
+    type: validator
+  - name: UserService
+    file: src/services/user-service.ts
+    type: service
+testContainers:
+  - postgres:15-alpine
+  - redis:7-alpine

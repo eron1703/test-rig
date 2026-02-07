@@ -1,0 +1,54 @@
+{
+  "total": {
+    "lines": {
+      "total": 450,
+      "covered": 382,
+      "skipped": 0,
+      "pct": 84.89
+    },
+    "statements": {
+      "total": 458,
+      "covered": 390,
+      "skipped": 0,
+      "pct": 85.15
+    },
+    "functions": {
+      "total": 78,
+      "covered": 65,
+      "skipped": 0,
+      "pct": 83.33
+    },
+    "branches": {
+      "total": 124,
+      "covered": 98,
+      "skipped": 0,
+      "pct": 79.03
+    }
+  },
+  "src/services/user-service.ts": {
+    "lines": {
+      "total": 85,
+      "covered": 78,
+      "skipped": 0,
+      "pct": 91.76
+    },
+    "statements": {
+      "total": 87,
+      "covered": 80,
+      "skipped": 0,
+      "pct": 91.95
+    },
+    "functions": {
+      "total": 12,
+      "covered": 11,
+      "skipped": 0,
+      "pct": 91.67
+    },
+    "branches": {
+      "total": 18,
+      "covered": 16,
+      "skipped": 0,
+      "pct": 88.89
+    }
+  }
+}

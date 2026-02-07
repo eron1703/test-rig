@@ -1,0 +1,71 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 5,
+  "numPassedTests": 5,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "startTime": 1699564800000,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["UserService"],
+          "fullName": "UserService should create user",
+          "status": "passed",
+          "title": "should create user",
+          "duration": 15,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": ["UserService"],
+          "fullName": "UserService should find user by id",
+          "status": "passed",
+          "title": "should find user by id",
+          "duration": 10,
+          "failureMessages": []
+        }
+      ],
+      "startTime": 1699564800000,
+      "endTime": 1699564800050,
+      "status": "passed",
+      "name": "/path/to/user-service.spec.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["AuthService"],
+          "fullName": "AuthService should authenticate user",
+          "status": "passed",
+          "title": "should authenticate user",
+          "duration": 20,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": ["AuthService"],
+          "fullName": "AuthService should generate token",
+          "status": "passed",
+          "title": "should generate token",
+          "duration": 12,
+          "failureMessages": []
+        },
+        {
+          "ancestorTitles": ["AuthService"],
+          "fullName": "AuthService should validate token",
+          "status": "passed",
+          "title": "should validate token",
+          "duration": 8,
+          "failureMessages": []
+        }
+      ],
+      "startTime": 1699564800100,
+      "endTime": 1699564800150,
+      "status": "passed",
+      "name": "/path/to/auth-service.spec.ts"
+    }
+  ]
+}

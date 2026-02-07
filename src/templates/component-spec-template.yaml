@@ -1,0 +1,156 @@
+# Component Specification Template
+# Use this template to define testable components for parallel agent execution
+
+component:
+  name: "component-name"  # e.g., "user-service"
+  type: "service|controller|repository|utility"
+  description: "Brief description of component purpose"
+  location: "src/services/user-service"
+  entry_point: "src/services/user-service/index.ts"
+
+# Break down into sub-components for granular testing
+subcomponents:
+  - name: "repository"
+    type: "data-access"
+    file: "src/services/user-service/repository.ts"
+    dependencies:
+      - database
+    responsibilities:
+      - "CRUD operations on user table"
+      - "Query user by email"
+      - "Transaction handling"
+    test_file: "tests/unit/user-service/repository.spec.ts"
+    test_priority: "high"
+    estimated_test_time: "5s"
+
+  - name: "validator"
+    type: "business-logic"
+    file: "src/services/user-service/validator.ts"
+    dependencies: []
+    responsibilities:
+      - "Validate email format"
+      - "Validate password strength"
+      - "Validate required fields"
+    test_file: "tests/unit/user-service/validator.spec.ts"
+    test_priority: "high"
+    estimated_test_time: "2s"
+
+  - name: "service"
+    type: "business-logic"
+    file: "src/services/user-service/service.ts"
+    dependencies:
+      - repository
+      - validator
+      - auth-service
+    responsibilities:
+      - "Create user with validation"
+      - "Update user profile"
+      - "Delete user"
+      - "Handle business rules"
+    test_file: "tests/unit/user-service/service.spec.ts"
+    test_priority: "high"
+    estimated_test_time: "10s"
+
+  - name: "controller"
+    type: "api"
+    file: "src/services/user-service/controller.ts"
+    dependencies:
+      - service
+      - auth-middleware
+    responsibilities:
+      - "HTTP request handling"
+      - "Input validation"
+      - "Response formatting"
+      - "Error handling"
+    test_file: "tests/unit/user-service/controller.spec.ts"
+    test_priority: "medium"
+    estimated_test_time: "8s"
+
+# Integration tests (testing multiple subcomponents together)
+integration_tests:
+  - name: "user-service-integration"
+    file: "tests/integration/user-service.integration.ts"
+    scope:
+      - repository
+      - service
+      - database
+    test_containers:
+      - postgres
+      - redis
+    responsibilities:
+      - "Test full user creation flow with real database"
+      - "Test user query with complex filters"
+      - "Test transaction rollback scenarios"
+    estimated_test_time: "30s"
+
+# API contract tests (for microservices)
+contract_tests:
+  - name: "user-api-contract"
+    file: "tests/contracts/user-service.contract.ts"
+    provider: "user-service"
+    consumers:
+      - auth-service
+      - order-service
+    endpoints:
+      - "POST /users"
+      - "GET /users/:id"
+      - "PUT /users/:id"
+      - "DELETE /users/:id"
+    estimated_test_time: "15s"
+
+# Test data requirements
+test_data:
+  factories:
+    - name: "UserFactory"
+      file: "tests/factories/user.factory.ts"
+      generates:
+        - valid_user
+        - user_with_long_email
+        - user_with_special_chars
+        - invalid_user_missing_email
+
+  fixtures:
+    - name: "users.json"
+      file: "tests/fixtures/users.json"
+      description: "Sample users for testing"
+      count: 10
+
+  seeds:
+    - name: "user_seed"
+      file: "tests/seeds/users.sql"
+      description: "Database seed for integration tests"
+      tables:
+        - users
+        - user_profiles
+
+# External dependencies (to be mocked in unit tests)
+external_dependencies:
+  - name: "auth-service"
+    type: "internal-api"
+    mock_strategy: "manual mock"
+    mock_file: "tests/mocks/auth-service.mock.ts"
+
+  - name: "email-service"
+    type: "external-api"
+    mock_strategy: "msw (mock service worker)"
+    mock_file: "tests/mocks/email-service.msw.ts"
+
+# Quality metrics
+quality_targets:
+  unit_coverage: "90%"
+  integration_coverage: "70%"
+  mutation_score: "80%"  # Optional: mutation testing
+
+# Parallel execution metadata
+execution:
+  parallel_safe: true
+  isolation_level: "full"  # Tests don't affect each other
+  estimated_total_time: "65s"  # Sum of all test times
+  recommended_agents: 4  # Run 4 subcomponents in parallel
+
+# Known issues or special considerations
+notes: |
+  - User repository tests require Postgres testcontainer
+  - Email validation tests cover 20+ edge cases
+  - Service tests mock auth-service to avoid external calls
+  - Integration tests use database transactions for isolation

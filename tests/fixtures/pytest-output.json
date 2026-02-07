@@ -1,0 +1,64 @@
+{
+  "created": 1699564800.0,
+  "duration": 2.45,
+  "exitcode": 1,
+  "root": "/path/to/project",
+  "environment": {
+    "Python": "3.11.0",
+    "Platform": "Darwin"
+  },
+  "summary": {
+    "total": 8,
+    "passed": 5,
+    "failed": 2,
+    "skipped": 1
+  },
+  "tests": [
+    {
+      "nodeid": "tests/test_user.py::test_create_user",
+      "outcome": "passed",
+      "duration": 0.15
+    },
+    {
+      "nodeid": "tests/test_user.py::test_find_user",
+      "outcome": "passed",
+      "duration": 0.12
+    },
+    {
+      "nodeid": "tests/test_auth.py::test_authenticate",
+      "outcome": "failed",
+      "duration": 0.25,
+      "call": {
+        "longrepr": "AssertionError: Token validation failed\n    assert False\n     +  where False = validate_token('invalid')"
+      }
+    },
+    {
+      "nodeid": "tests/test_auth.py::test_generate_token",
+      "outcome": "passed",
+      "duration": 0.18
+    },
+    {
+      "nodeid": "tests/test_payment.py::test_process_payment",
+      "outcome": "passed",
+      "duration": 0.35
+    },
+    {
+      "nodeid": "tests/test_payment.py::test_refund",
+      "outcome": "failed",
+      "duration": 0.22,
+      "call": {
+        "longrepr": "ValueError: Refund amount exceeds original payment\n  File \"payment.py\", line 42, in refund\n    raise ValueError(\"Refund amount exceeds original payment\")"
+      }
+    },
+    {
+      "nodeid": "tests/test_payment.py::test_declined_payment",
+      "outcome": "passed",
+      "duration": 0.20
+    },
+    {
+      "nodeid": "tests/test_notifications.py::test_send_email",
+      "outcome": "skipped",
+      "duration": 0.01
+    }
+  ]
+}
