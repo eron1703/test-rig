@@ -1,5 +1,9 @@
 import http from 'http';
 import chalk from 'chalk';
+import { loadConfig } from '../core/config-loader.js';
+import { runTestsSequential } from '../core/test-runner.js';
+import { runTestsParallel } from '../agents/orchestrator.js';
+import { generateTests, type ComponentAnalysis } from '../agents/test-generator.js';
 
 interface RequestBody {
   type?: string;
@@ -36,16 +40,26 @@ export async function startServer(host: string, port: number) {
       req.on('end', async () => {
         try {
           const data: RequestBody = JSON.parse(body);
-          // TODO: Implement test running
+          
+          // Load configuration
+          const config = await loadConfig(process.cwd());
+          
+          // Execute tests based on parallel flag
+          const result = data.parallel
+            ? await runTestsParallel({ config, agents: data.agents || 4 })
+            : await runTestsSequential({ config, type: data.type });
+          
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
-            status: 'success',
-            message: 'Tests running',
-            data
+            success: true,
+            data: result
           }));
-        } catch (error) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+        } catch (error: any) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            error: error.message || 'Failed to run tests'
+          }));
         }
       });
       return;
@@ -57,53 +71,38 @@ export async function startServer(host: string, port: number) {
       req.on('end', async () => {
         try {
           const data = JSON.parse(body);
-          // TODO: Implement test generation
+          const { component, type } = data;
+          
+          if (!component) {
+            throw new Error('component parameter is required');
+          }
+          
+          // Create analysis object for test generation
+          const analysis: ComponentAnalysis = {
+            component,
+            files: [],
+            subcomponents: [{
+              name: component,
+              file: `src/${component}.ts`,
+              type: type || 'unit'
+            }]
+          };
+          
+          // Generate tests
+          const files = await generateTests(analysis, process.cwd());
+          
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({
-            status: 'success',
-            message: 'Tests generated',
-            data
+            success: true,
+            data: { files }
           }));
-        } catch (error) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
+        } catch (error: any) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            error: error.message || 'Failed to generate tests'
+          }));
         }
-      });
-      return;
-    }
-
-    if (url === '/test/stream' && req.method === 'GET') {
-      // Server-Sent Events (SSE) endpoint for test progress streaming
-      res.writeHead(200, {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-        'Access-Control-Allow-Origin': '*'
-      });
-
-      // Send initial connection message
-      res.write(`data: ${JSON.stringify({ status: 'connected', progress: 0 })}\n\n`);
-
-      // Simulate test progress
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 15) + 5; // Increment 5-20%
-        if (progress > 100) progress = 100;
-
-        res.write(`data: ${JSON.stringify({ 
-          status: progress === 100 ? 'complete' : 'running', 
-          progress 
-        })}\n\n`);
-
-        if (progress === 100) {
-          clearInterval(interval);
-          res.end();
-        }
-      }, 1000);
-
-      // Handle client disconnect
-      req.on('close', () => {
-        clearInterval(interval);
       });
       return;
     }
@@ -121,7 +120,6 @@ export async function startServer(host: string, port: number) {
     console.log(chalk.gray('API Endpoints:'));
     console.log(chalk.gray('   POST /test/run - Run tests'));
     console.log(chalk.gray('   POST /test/generate - Generate tests'));
-    console.log(chalk.gray('   GET /test/stream - Stream test progress'));
     console.log(chalk.gray('   GET /health - Health check\n'));
   });
 
