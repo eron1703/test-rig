@@ -57,6 +57,7 @@ program
   .option('-a, --agents <count>', 'Number of parallel agents', '4')
   .option('-c, --component <name>', 'Run specific component tests')
   .option('-w, --watch', 'Watch mode', false)
+  .option('--json', 'Output results as JSON (no spinners/colors)', false)
   .option('--headless', 'Run in headless mode (no interactive prompts)', false)
   .option('--non-interactive', 'Alias for --headless', false)
   .action(runCommand);
