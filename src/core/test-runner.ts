@@ -140,3 +140,81 @@ export async function runTestsSequential(options: any): Promise<TestResult> {
     failures: []
   };
 }
+
+export function parsePlaywrightResults(jsonOutput: string): TestResult {
+  try {
+    const data = JSON.parse(jsonOutput);
+    
+    const failures: TestFailure[] = [];
+    
+    // Playwright JSON output format includes 'suites' with test results
+    if (data.suites) {
+      for (const suite of data.suites) {
+        const processTests = (tests: any[], suiteName: string) => {
+          for (const test of tests || []) {
+            if (test.status === 'failed') {
+              const failureMessage = test.error?.message || 'Test failed';
+              failures.push({
+                name: `${suiteName} > ${test.title}`,
+                message: failureMessage,
+                stack: test.error?.stack || failureMessage,
+                file: suite.file
+              });
+            }
+          }
+        };
+        
+        if (suite.tests) {
+          processTests(suite.tests, suite.title);
+        }
+        
+        // Handle nested suites
+        if (suite.suites) {
+          for (const nestedSuite of suite.suites) {
+            if (nestedSuite.tests) {
+              processTests(nestedSuite.tests, `${suite.title} > ${nestedSuite.title}`);
+            }
+          }
+        }
+      }
+    }
+    
+    // Calculate totals from stats
+    const stats = data.stats || {};
+    
+    return {
+      total: stats.expected || 0,
+      passed: (stats.expected || 0) - (stats.failures || 0) - (stats.skipped || 0),
+      failed: stats.failures || 0,
+      skipped: stats.skipped || 0,
+      duration: stats.duration || 0,
+      failures
+    };
+  } catch (error: any) {
+    throw new Error(`Failed to parse Playwright results: ${error.message}`);
+  }
+}
+
+export async function runPlaywrightTests(testPath?: string): Promise<TestResult> {
+  const args = ['test', '--reporter=json'];
+  if (testPath) args.push(testPath);
+  
+  try {
+    const result = await execa('npx', ['playwright', ...args], {
+      cwd: process.cwd()
+    });
+    
+    return parsePlaywrightResults(result.stdout);
+  } catch (error: any) {
+    // Playwright may exit with non-zero status if tests fail, but still produces JSON output
+    if (error.stdout) {
+      try {
+        return parsePlaywrightResults(error.stdout);
+      } catch (parseError) {
+        throw parseError;
+      }
+    }
+    
+    throw error;
+  }
+}
