@@ -11,6 +11,16 @@ Multi-agent testing infrastructure for monoliths and microservices. Works seamle
 - 🎯 **AI-Powered Generation** - Auto-generate tests from code analysis
 - 🚀 **Zero Config** - Auto-detect project type and setup
 
+## 🤖 Autonomous Agent Execution
+
+**IMPORTANT:** test-rig is designed for headless, background execution. All commands default to non-interactive mode.
+
+For CI/CD and agent usage:
+- Commands auto-detect CI environments
+- Interactive prompts are disabled
+- Use `--yes` flag to skip confirmations
+- All tests run in background/headless mode
+
 ## Installation
 
 ### Global Installation (Recommended)
@@ -48,21 +58,52 @@ test-rig --version
 # Navigate to your project
 cd ~/projects/your-project
 
-# Setup test infrastructure
-test-rig setup
+# Setup test infrastructure (non-interactive)
+test-rig setup --yes
 
-# Generate tests for a component
-test-rig generate user-service
+# Generate tests for a component (headless)
+test-rig generate user-service --non-interactive
 
-# Run tests
-test-rig run
+# Run tests (background)
+test-rig run --headless
 
 # Run tests in parallel (multi-agent)
-test-rig run --parallel --agents 4
+test-rig run --parallel --agents 4 --headless
 
 # Check coverage
-test-rig coverage
+test-rig coverage --headless
 ```
+
+## Autonomous Agent Usage
+
+### CRITICAL RULES FOR CODING AGENTS
+
+All test-rig commands MUST run in headless mode:
+
+✅ CORRECT - Non-interactive execution:
+```bash
+test-rig setup --yes
+test-rig generate auth-service --non-interactive
+test-rig run --headless
+test-rig run --parallel --agents 4 --headless
+```
+
+❌ INCORRECT - Interactive prompts (blocks agents):
+```bash
+test-rig setup          # Will prompt for input
+test-rig generate auth  # May ask questions
+test-rig run            # Without --headless flag
+```
+
+### CI/CD Detection
+test-rig auto-detects CI environments and disables interactive mode:
+- GitHub Actions (GITHUB_ACTIONS)
+- GitLab CI (GITLAB_CI)
+- Jenkins (JENKINS_HOME)
+- Generic CI (CI=true)
+- Non-TTY environments
+
+> **⚠️ WARNING:** Interactive mode is for manual use only. Coding agents and CI/CD pipelines must use `--yes` or `--headless` flags.
 
 ## Commands
 
@@ -73,6 +114,12 @@ Initialize test infrastructure for the current project.
 - Creates folder structure
 - Generates configuration files
 
+**Usage:**
+```bash
+test-rig setup --yes              # Non-interactive
+test-rig setup --yes --verbose    # Non-interactive with logs
+```
+
 ### `test-rig generate <component>`
 Generate tests for a specific component.
 - Analyzes component code
@@ -81,22 +128,49 @@ Generate tests for a specific component.
 - Generates integration tests
 - Creates test data factories
 
+**Usage:**
+```bash
+test-rig generate user-service --non-interactive
+test-rig generate auth-service --non-interactive --verbose
+```
+
 ### `test-rig run [type]`
 Run tests.
-- `test-rig run` - Run all tests
-- `test-rig run unit` - Unit tests only
-- `test-rig run integration` - Integration tests only
-- `test-rig run e2e` - E2E tests only
-- `test-rig run --parallel` - Multi-agent parallel execution
+- `test-rig run --headless` - Run all tests (headless)
+- `test-rig run unit --headless` - Unit tests only
+- `test-rig run integration --headless` - Integration tests only
+- `test-rig run e2e --headless` - E2E tests only
+- `test-rig run --parallel --agents 4 --headless` - Multi-agent parallel execution
+
+**Usage:**
+```bash
+test-rig run --headless
+test-rig run --parallel --agents 4 --headless
+```
 
 ### `test-rig coverage`
 Generate coverage report.
 
+**Usage:**
+```bash
+test-rig coverage --headless
+```
+
 ### `test-rig analyze`
 Analyze codebase for testability.
 
+**Usage:**
+```bash
+test-rig analyze --headless
+```
+
 ### `test-rig doctor`
 Check test setup health.
+
+**Usage:**
+```bash
+test-rig doctor --verbose --headless
+```
 
 ## Configuration
 
@@ -142,7 +216,7 @@ subcomponents:
 Test-rig spawns multiple agents to run tests in parallel:
 
 ```bash
-test-rig run --parallel --agents 4
+test-rig run --parallel --agents 4 --headless
 ```
 
 Each agent:
@@ -152,6 +226,8 @@ Each agent:
 4. Reports results
 
 **Result:** 3-4x faster test execution with no conflicts.
+
+**For coding agents:** Always use `--headless` flag to ensure non-interactive execution.
 
 ## Project Structure
 
@@ -195,7 +271,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
       - run: npm install -g @hcb-consulting/test-rig
-      - run: test-rig run --parallel
+      - run: test-rig setup --yes
+      - run: test-rig run --parallel --agents 4 --headless
 ```
 
 ### GitLab CI
@@ -206,7 +283,8 @@ test:
   before_script:
     - npm install -g @hcb-consulting/test-rig
   script:
-    - test-rig run --parallel
+    - test-rig setup --yes
+    - test-rig run --parallel --agents 4 --headless
 ```
 
 ## Server Deployment Setup
