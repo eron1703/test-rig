@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "postbuild": "cp -r src/templates dist/",
     "dev": "tsc --watch",
     "test": "vitest",
     "lint": "eslint src/",

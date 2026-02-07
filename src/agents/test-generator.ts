@@ -19,6 +19,13 @@ function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function toPascalCase(str: string): string {
+  return str
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('');
+}
+
 function getComponentPath(file: string): string {
   // Extract path from src/services/user-service.ts -> services/user-service
   const match = file.match(/src\/(.+)\.ts$/);
@@ -35,9 +42,19 @@ async function renderUnitTestTemplate(
   let template = await fs.readFile(templatePath, 'utf-8');
 
   // Replace placeholders
-  template = template.replace(/UserService/g, subcomponentName);
-  template = template.replace(/user-service/g, componentName);
+  const pascalComponentName = toPascalCase(componentName);
+  const pascalSubcomponentName = toPascalCase(subcomponentName);
+
+  // Replace class names (PascalCase)
+  template = template.replace(/UserService/g, pascalSubcomponentName);
+
+  // Replace import paths (must come before factory replacements)
   template = template.replace(/@\/services\/user-service/g, `@/${getComponentPath(subcomponentFile)}`);
+
+  // Replace in describe() calls (not in paths)
+  template = template.replace(/describe\('UserService'/g, `describe('${pascalSubcomponentName}'`);
+
+  // Replace factory references
   template = template.replace(/user\.factory/g, `${componentName}-${subcomponentName}.factory`);
 
   const outputPath = path.join(outputDir, `tests/unit/${componentName}/${subcomponentName}.spec.ts`);
@@ -56,8 +73,11 @@ async function renderFactoryTemplate(
   let template = await fs.readFile(templatePath, 'utf-8');
 
   // Replace placeholders - simplified factory
-  template = template.replace(/User/g, subcomponentName);
-  template = template.replace(/user/g, subcomponentName.toLowerCase());
+  const pascalSubcomponentName = toPascalCase(subcomponentName);
+  const lowerSubcomponentName = subcomponentName.toLowerCase().replace(/-/g, '');
+
+  template = template.replace(/User/g, pascalSubcomponentName);
+  template = template.replace(/user/g, lowerSubcomponentName);
 
   const outputPath = path.join(outputDir, `tests/factories/${componentName}-${subcomponentName}.factory.ts`);
   await fs.ensureDir(path.dirname(outputPath));
@@ -76,9 +96,19 @@ async function renderIntegrationTestTemplate(
   let template = await fs.readFile(templatePath, 'utf-8');
 
   // Replace placeholders
-  template = template.replace(/UserService/g, subcomponentName);
-  template = template.replace(/user-service/g, componentName);
+  const pascalComponentName = toPascalCase(componentName);
+  const pascalSubcomponentName = toPascalCase(subcomponentName);
+
+  // Replace class names (PascalCase)
+  template = template.replace(/UserService/g, pascalSubcomponentName);
+
+  // Replace import paths (must come before factory replacements)
   template = template.replace(/@\/services\/user-service/g, `@/${getComponentPath(subcomponentFile)}`);
+
+  // Replace in describe() calls (not in paths)
+  template = template.replace(/describe\('UserService/g, `describe('${pascalSubcomponentName}`);
+
+  // Replace factory references
   template = template.replace(/user\.factory/g, `${componentName}-${subcomponentName}.factory`);
 
   const outputPath = path.join(outputDir, `tests/integration/${componentName}/${subcomponentName}.integration.ts`);

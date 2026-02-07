@@ -1,0 +1,159 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║           TEST-RIG IMPROVEMENT PRIORITY MATRIX (ROI Analysis)               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+                             IMPACT (1-10)
+                    │
+                    │ 10│
+                    │ 9 │           [5] Claude AI (9/10, 6-8h, ROI=1.5)
+                    │ 8 │           [9] Microservices (8/10, 8-10h, ROI=0.9)
+                    │ 7 │           [2] Mocha (7/10, 3-4h, ROI=2.3)
+                    │ 6 │           [3] Container (6/10, 1-2h, ROI=6.0)
+                    │ 5 │           [4] Watch Mode (6/10, 2h, ROI=3.0)
+                    │ 4 │           [6] Error Messages (5/10, 2-3h, ROI=2.3)
+                    │   │
+                    │ 3 │           [7] Documentation (4/10, 3h, ROI=1.3)
+                    │ 2 │           [8] API Docs (4/10, 3h, ROI=1.3)
+                    │   │
+                    │ 1 │
+                    │___│____________________________________________
+                    └───┴───┬────┬────┬────┬────┬────┬────┬────┬────┤
+                        1-2  2-3  3-4  4-5  5-6  6-7  7-8  8-9 9-10
+                             EFFORT (hours)
+
+─────────────────────────────────────────────────────────────────────────────
+
+PRIORITY ZONES:
+
+┌─ CRITICAL PATH (Fix First)                                              ────┐
+│                                                                              │
+│  [1] PascalCase Bug           10/10  2-3h   ROI=5.0   STATUS: BLOCKING    │
+│      └─ Highest priority, highest ROI, blocks all test generation         │
+│                                                                              │
+│  [2] Mocha Support            7/10   3-4h   ROI=2.3   STATUS: BLOCKING    │
+│      └─ Second priority, blocks legacy Node.js projects                   │
+│                                                                              │
+│  [3] Container Config         6/10   1-2h   ROI=6.0   STATUS: BLOCKING    │
+│      └─ Highest ROI ratio, unblocks testcontainers                        │
+│                                                                              │
+│  BUILD FIX (Templates)        N/A    1h     ROI=∞     STATUS: BLOCKER     │
+│      └─ Required for CI/CD, high priority                                 │
+│                                                                              │
+└─ RECOMMENDED COMPLETION TIME: 1 WEEK (7-10 hours)                        ────┘
+
+┌─ QUICK WINS (Easy Wins)                                                 ────┐
+│                                                                              │
+│  [4] Watch Mode               6/10   2h     ROI=3.0   STATUS: READY      │
+│      └─ Improves developer experience significantly                       │
+│                                                                              │
+│  [6] Error Messages           5/10   2-3h   ROI=2.3   STATUS: READY      │
+│      └─ Reduces support burden, improves UX                              │
+│                                                                              │
+│  [7] Documentation            4/10   3h     ROI=1.3   STATUS: READY      │
+│      └─ Enables advanced features, builds community                      │
+│                                                                              │
+└─ RECOMMENDED COMPLETION TIME: 1 WEEK (7-8 hours)                        ────┘
+
+┌─ STRATEGIC FEATURES (Differentiation)                                   ────┐
+│                                                                              │
+│  [5] Claude AI Integration    9/10   6-8h   ROI=1.5   STATUS: PLANNED    │
+│      └─ Highest impact, major market differentiator                      │
+│                                                                              │
+│  [9] Cross-Service Testing    8/10   8-10h  ROI=0.9   STATUS: PLANNED    │
+│      └─ Microservice market capture                                      │
+│                                                                              │
+│  [10] REST API               6/10   5-6h   ROI=1.2   STATUS: PLANNED     │
+│      └─ Enterprise feature enablement                                     │
+│                                                                              │
+└─ RECOMMENDED COMPLETION TIME: 2-3 WEEKS (19-24 hours)                  ────┘
+
+─────────────────────────────────────────────────────────────────────────────
+
+EFFORT DISTRIBUTION:
+
+Quick Wins      (2-3h effort):  ███░░░░░░░ 15% of blockers
+Med Priority    (3-4h effort):  ████░░░░░░ 20% of blockers
+Core Fixes      (5-8h effort):  █████░░░░░ 25% of blockers
+Strategic       (8-10h effort): ██████░░░░ 40% overall
+
+BLOCKING ISSUES: Priority 1-3 + Build = 7-10 hours (1 week)
+PRODUCTION READY: Priority 1-4 + Docs = 14-18 hours (2 weeks)
+COMPETITIVE: Priority 1-5 + Microservices = 28-36 hours (4 weeks)
+
+─────────────────────────────────────────────────────────────────────────────
+
+ROI RANKING (Impact / Effort):
+
+1. Container Config       6.0x   1-2 hours  ⭐⭐⭐⭐⭐ HIGHEST ROI
+2. PascalCase Bug         5.0x   2-3 hours  ⭐⭐⭐⭐⭐ CRITICAL
+3. Watch Mode            3.0x   2 hours    ⭐⭐⭐⭐  
+4. Mocha Support         2.3x   3-4 hours  ⭐⭐⭐⭐  ESSENTIAL
+5. Error Messages        2.3x   2-3 hours  ⭐⭐⭐⭐  
+6. Claude AI             1.5x   6-8 hours  ⭐⭐⭐   STRATEGIC
+7. API Documentation     1.3x   3 hours    ⭐⭐⭐   
+8. Docs (General)        1.3x   3 hours    ⭐⭐⭐   
+9. REST API              1.2x   5-6 hours  ⭐⭐    ENTERPRISE
+10. Cross-Service       0.9x   8-10 hours  ⭐⭐    
+
+─────────────────────────────────────────────────────────────────────────────
+
+TIMELINE RECOMMENDATION:
+
+WEEK 1: BLOCKERS (Sprint: "Fix Blockers")
+├─ Priority 1: PascalCase bug (2-3h)
+├─ Priority 2: Mocha support (3-4h)
+├─ Priority 3: Container config (1-2h)
+└─ Build fix: Template distribution (1h)
+Result: Test generation works end-to-end
+
+WEEK 2: QUICK WINS (Sprint: "Improve UX")
+├─ Priority 4: Watch mode (2h)
+├─ Priority 6: Better error messages (2-3h)
+└─ Quick Wins: API docs, troubleshooting (3h)
+Result: Developer-friendly tool
+
+WEEK 3-4: STRATEGIC (Sprint: "Differentiate")
+├─ Priority 5: Claude AI integration (6-8h)
+├─ Cross-service testing (8-10h)
+└─ REST API implementation (5-6h)
+Result: Market-leading features
+
+WEEK 5+: ENTERPRISE (Sprint: "Scale")
+├─ Test distribution system (6-8h)
+├─ Results aggregation (3-4h)
+└─ Performance tuning (ongoing)
+Result: SaaS-ready product
+
+─────────────────────────────────────────────────────────────────────────────
+
+SUCCESS METRICS BY MILESTONE:
+
+BLOCKER FIXES (1 week):
+  ✓ test-rig generate produces valid TypeScript (0 compilation errors)
+  ✓ Mocha projects can run tests with test-rig
+  ✓ Container tests run without manual intervention
+  ✓ Build process is automated (no manual copying)
+
+UX IMPROVEMENTS (2 weeks):
+  ✓ Watch mode reloads tests in <1 second
+  ✓ Error messages guide users to solutions
+  ✓ Documentation covers 90% of use cases
+
+STRATEGIC FEATURES (4 weeks):
+  ✓ Claude generates 5+ test suggestions per component
+  ✓ Cross-service tests reduce integration issues
+  ✓ REST API enables third-party integrations
+  ✓ 50%+ code coverage improvement (claimed by users)
+
+─────────────────────────────────────────────────────────────────────────────
+
+RESOURCE ALLOCATION:
+
+Week 1: 1 developer full-time (40h → 7-10h blocker work)
+Week 2: 1 developer part-time (20h → 7-8h quick wins)
+Week 3-4: 1 developer full-time (80h → 19-24h strategic features)
+Week 5+: Variable based on enterprise demand
+
+Cost: ~$8-10k developer time for production-ready product (4 weeks)
+
+─────────────────────────────────────────────────────────────────────────────
