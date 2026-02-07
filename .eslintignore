@@ -1,0 +1,4 @@
+# ESLint ignore file
+src/templates/
+dist/
+node_modules/

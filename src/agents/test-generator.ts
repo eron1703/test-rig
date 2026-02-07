@@ -15,10 +15,6 @@ export interface ComponentAnalysis {
   }>;
 }
 
-function capitalize(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 function toPascalCase(str: string): string {
   return str
     .split('-')
@@ -42,7 +38,6 @@ async function renderUnitTestTemplate(
   let template = await fs.readFile(templatePath, 'utf-8');
 
   // Replace placeholders
-  const pascalComponentName = toPascalCase(componentName);
   const pascalSubcomponentName = toPascalCase(subcomponentName);
 
   // Replace class names (PascalCase)
@@ -96,7 +91,6 @@ async function renderIntegrationTestTemplate(
   let template = await fs.readFile(templatePath, 'utf-8');
 
   // Replace placeholders
-  const pascalComponentName = toPascalCase(componentName);
   const pascalSubcomponentName = toPascalCase(subcomponentName);
 
   // Replace class names (PascalCase)

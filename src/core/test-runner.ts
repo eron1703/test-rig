@@ -208,13 +208,9 @@ export async function runPlaywrightTests(testPath?: string): Promise<TestResult>
   } catch (error: any) {
     // Playwright may exit with non-zero status if tests fail, but still produces JSON output
     if (error.stdout) {
-      try {
-        return parsePlaywrightResults(error.stdout);
-      } catch (parseError) {
-        throw parseError;
-      }
+      return parsePlaywrightResults(error.stdout);
     }
-    
+
     throw error;
   }
 }
