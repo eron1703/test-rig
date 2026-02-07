@@ -118,6 +118,37 @@ async function renderIntegrationTestTemplate(
   return outputPath;
 }
 
+async function renderE2ETestTemplate(
+  component: string,
+  subcomponent: { name: string; file: string; type: string },
+  outputDir: string
+): Promise<string> {
+  const templatePath = path.join(__dirname, '../templates/test-template.e2e.ts');
+  let template = await fs.readFile(templatePath, 'utf-8');
+
+  // Replace placeholders
+  const pascalComponentName = toPascalCase(component);
+  const pascalSubcomponentName = toPascalCase(subcomponent.name);
+
+  // Replace class names (PascalCase)
+  template = template.replace(/UserService/g, pascalSubcomponentName);
+
+  // Replace import paths (must come before factory replacements)
+  template = template.replace(/@\/services\/user-service/g, `@/${getComponentPath(subcomponent.file)}`);
+
+  // Replace in describe() calls (not in paths)
+  template = template.replace(/test\.describe\('UserService/g, `test.describe('${pascalSubcomponentName}`);
+
+  // Replace factory references
+  template = template.replace(/user\.factory/g, `${component}-${subcomponent.name}.factory`);
+
+  const outputPath = path.join(outputDir, `tests/e2e/${component}/${subcomponent.name}.e2e.ts`);
+  await fs.ensureDir(path.dirname(outputPath));
+  await fs.writeFile(outputPath, template);
+
+  return outputPath;
+}
+
 export async function generateTests(
   analysis: ComponentAnalysis,
   outputDir: string = process.cwd()
@@ -150,6 +181,14 @@ export async function generateTests(
       outputDir
     );
     generatedFiles.push(integrationTestPath);
+
+    // Generate E2E test
+    const e2eTestPath = await renderE2ETestTemplate(
+      analysis.component,
+      subcomponent,
+      outputDir
+    );
+    generatedFiles.push(e2eTestPath);
   }
 
   return generatedFiles;
