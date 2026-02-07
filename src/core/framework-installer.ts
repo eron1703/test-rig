@@ -8,6 +8,9 @@ export async function installFramework(framework: string, tech: string): Promise
       await execa('npm', ['install', '-D', 'jest', '@types/jest', '@faker-js/faker', 'testcontainers']);
     } else if (framework === 'mocha') {
       await execa('npm', ['install', '-D', 'mocha', '@types/mocha', 'chai', '@types/chai'], { cwd: process.cwd() });
+    } else if (framework === 'playwright') {
+      await execa('npm', ['install', '-D', '@playwright/test', 'playwright'], { cwd: process.cwd() });
+      await execa('npx', ['playwright', 'install', 'chromium'], { cwd: process.cwd() });
     }
   } else if (tech === 'python') {
     if (framework === 'pytest') {
