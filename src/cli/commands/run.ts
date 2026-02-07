@@ -3,15 +3,31 @@ import ora from 'ora';
 import { loadConfig } from '../../core/config-loader.js';
 import { runTestsSequential } from '../../core/test-runner.js';
 import { runTestsParallel } from '../../agents/orchestrator.js';
+import { cliConfig } from '../index.js';
+import { isAutomatedEnvironment, shouldAutoYes } from '../../utils/environment.js';
 
 interface RunOptions {
   parallel?: boolean;
   agents?: string;
   component?: string;
   watch?: boolean;
+  headless?: boolean;
+  nonInteractive?: boolean;
 }
 
 export async function runCommand(type: string = 'all', options: RunOptions) {
+  // Auto-enable headless mode in CI/agent environments
+  if (shouldAutoYes() && !options.headless && !options.nonInteractive) {
+    console.log(chalk.gray('Auto-detected CI/agent environment, enabling headless mode\n'));
+    options.nonInteractive = true;
+  }
+
+  const isHeadless = options.headless || options.nonInteractive || cliConfig.headless || isAutomatedEnvironment();
+
+  if (isHeadless) {
+    console.log(chalk.gray('[HEADLESS MODE]'));
+  }
+
   console.log(chalk.blue.bold('\n🧪 Running tests\n'));
 
   const spinner = ora('Loading configuration...').start();

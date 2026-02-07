@@ -5,14 +5,33 @@ import { detectProjectType, ProjectType } from '../../core/project-detector.js';
 import { installFramework } from '../../core/framework-installer.js';
 import { createFolderStructure } from '../../core/folder-creator.js';
 import { generateConfig } from '../../core/config-generator.js';
+import { cliConfig } from '../index.js';
+import { isCI, isClaude, isAutomatedEnvironment, requireNonInteractive, shouldAutoYes } from '../../utils/environment.js';
 
 interface SetupOptions {
   framework?: string;
   yes?: boolean;
+  headless?: boolean;
+  nonInteractive?: boolean;
 }
 
 export async function setupCommand(options: SetupOptions) {
   console.log(chalk.blue.bold('\n🔧 Test-Rig Setup\n'));
+
+  // Auto-enable --yes in CI/agent environments
+  if (shouldAutoYes() && !options.yes) {
+    console.log(chalk.gray('Auto-detected CI/agent environment, enabling --yes\n'));
+    options.yes = true;
+  }
+
+  // Determine if running in non-interactive mode
+  const isNonInteractive = options.headless || options.nonInteractive || cliConfig.headless || isAutomatedEnvironment();
+  const skipPrompts = options.yes || isNonInteractive;
+
+  // Validate: prevent interactive mode in CI
+  if (!skipPrompts && isAutomatedEnvironment()) {
+    requireNonInteractive('setup');
+  }
 
   const spinner = ora('Detecting project type...').start();
 
@@ -27,8 +46,8 @@ export async function setupCommand(options: SetupOptions) {
       framework = projectType.tech === 'python' ? 'pytest' : 'vitest';
     }
 
-    // Confirm with user
-    if (!options.yes) {
+    // Confirm with user (skip if --yes or headless)
+    if (!skipPrompts) {
       const answers = await inquirer.prompt([
         {
           type: 'list',
@@ -62,6 +81,10 @@ export async function setupCommand(options: SetupOptions) {
       framework = answers.framework;
       projectType.parallelAgents = answers.agents;
       projectType.containers = answers.containers;
+    } else if (isNonInteractive) {
+      console.log(chalk.gray('Running in headless mode - using defaults'));
+      projectType.parallelAgents = 4;
+      projectType.containers = ['postgres'];
     }
 
     // Install framework

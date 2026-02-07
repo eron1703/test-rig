@@ -3,13 +3,29 @@ import ora from 'ora';
 import { analyzeComponent } from '../../core/component-analyzer.js';
 import { generateComponentSpec } from '../../core/spec-generator.js';
 import { generateTests } from '../../agents/test-generator.js';
+import { cliConfig } from '../index.js';
+import { isAutomatedEnvironment, shouldAutoYes } from '../../utils/environment.js';
 
 interface GenerateOptions {
   type?: string;
   specOnly?: boolean;
+  headless?: boolean;
+  nonInteractive?: boolean;
 }
 
 export async function generateCommand(component: string, options: GenerateOptions) {
+  // Auto-enable headless mode in CI/agent environments
+  if (shouldAutoYes() && !options.headless && !options.nonInteractive) {
+    console.log(chalk.gray('Auto-detected CI/agent environment, enabling headless mode\n'));
+    options.nonInteractive = true;
+  }
+
+  const isNonInteractive = options.headless || options.nonInteractive || cliConfig.headless || isAutomatedEnvironment();
+
+  if (isNonInteractive) {
+    console.log(chalk.gray('[HEADLESS MODE]'));
+  }
+
   console.log(chalk.blue.bold(`\n🧪 Generating tests for ${component}\n`));
 
   const spinner = ora('Analyzing component...').start();

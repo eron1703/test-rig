@@ -2,6 +2,7 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { isCI, isAutomatedEnvironment } from '../utils/environment.js';
 import { setupCommand } from './commands/setup.js';
 import { generateCommand } from './commands/generate.js';
 import { runCommand } from './commands/run.js';
@@ -10,18 +11,34 @@ import { analyzeCommand } from './commands/analyze.js';
 import { doctorCommand } from './commands/doctor.js';
 import { serveCommand } from './commands/serve.js';
 
+// Store CI state globally for access by commands
+export const cliConfig = {
+  isCI: isCI(),
+  headless: false
+};
+
 const program = new Command();
 
 program
   .name('test-rig')
   .description('Multi-agent testing infrastructure for monoliths and microservices')
-  .version('1.0.0');
+  .version('1.0.0')
+  .option('--headless', 'Run in headless mode (no interactive prompts)', false)
+  .option('--non-interactive', 'Alias for --headless', false);
+
+// Hook to process global options before commands execute
+program.hook('preAction', (thisCommand: any) => {
+  const opts = thisCommand.opts();
+  cliConfig.headless = opts.headless || opts.nonInteractive || isAutomatedEnvironment();
+});
 
 program
   .command('setup')
   .description('Initialize test infrastructure for current project')
   .option('-f, --framework <framework>', 'Test framework (vitest|pytest|auto)', 'auto')
   .option('-y, --yes', 'Skip prompts and use defaults', false)
+  .option('--headless', 'Run in headless mode (no interactive prompts)', false)
+  .option('--non-interactive', 'Alias for --headless', false)
   .action(setupCommand);
 
 program
@@ -29,6 +46,8 @@ program
   .description('Generate tests for a component')
   .option('-t, --type <type>', 'Test type (unit|integration|e2e|all)', 'all')
   .option('--spec-only', 'Generate spec file only', false)
+  .option('--headless', 'Run in headless mode (no interactive prompts)', false)
+  .option('--non-interactive', 'Alias for --headless', false)
   .action(generateCommand);
 
 program
@@ -38,6 +57,8 @@ program
   .option('-a, --agents <count>', 'Number of parallel agents', '4')
   .option('-c, --component <name>', 'Run specific component tests')
   .option('-w, --watch', 'Watch mode', false)
+  .option('--headless', 'Run in headless mode (no interactive prompts)', false)
+  .option('--non-interactive', 'Alias for --headless', false)
   .action(runCommand);
 
 program
